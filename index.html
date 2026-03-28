@@ -1,238 +1,62 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
-<html>
+<!DOCTYPE html>
+<html lang="fr">
 <head>
-  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-  <meta http-equiv="Content-Style-Type" content="text/css">
-  <title></title>
-  <meta name="Generator" content="Cocoa HTML Writer">
-  <meta name="CocoaVersion" content="2685.4">
-  <style type="text/css">
-    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica}
-    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica; min-height: 14.0px}
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Flip7 Score">
+    <title>Flip7 Score</title>
+    <style>
+        :root { --bg-color: #f2f2f7; --card-bg: #ffffff; --primary: #007aff; --danger: #ff3b30; --text: #000000; }
+        body { font-family: -apple-system, system-ui; background-color: var(--bg-color); color: var(--text); margin: 0; padding: 20px; padding-top: env(safe-area-inset-top, 40px); }
+        h1 { text-align: center; }
+        .add-player-container { display: flex; gap: 10px; margin-bottom: 20px; }
+        input[type="text"] { flex-grow: 1; padding: 12px; border: none; border-radius: 10px; font-size: 16px; }
+        .btn-add { background: var(--primary); color: white; border: none; border-radius: 10px; padding: 0 20px; font-weight: 600; }
+        .player-card { background: var(--card-bg); border-radius: 12px; padding: 15px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .player-score { font-size: 22px; font-weight: bold; color: var(--primary); }
+        .score-controls { display: flex; align-items: center; gap: 8px; }
+        .btn-score { width: 44px; height: 44px; border-radius: 22px; border: none; background: #e5e5ea; font-size: 24px; color: var(--primary); }
+        .btn-delete { width: 44px; height: 44px; border-radius: 22px; border: none; background: #ffe5e5; color: var(--danger); margin-left: 10px; }
+    </style>
 </head>
 <body>
-<p class="p1">&lt;!DOCTYPE html&gt;</p>
-<p class="p1">&lt;html lang="fr"&gt;</p>
-<p class="p1">&lt;head&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;meta charset="UTF-8"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"&gt;</p>
-<p class="p2"><span class="Apple-converted-space">    </span></p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;meta name="apple-mobile-web-app-capable" content="yes"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;meta name="apple-mobile-web-app-title" content="Flip7 Score"&gt;</p>
-<p class="p2"><span class="Apple-converted-space">    </span></p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;title&gt;Flip7 Score&lt;/title&gt;</p>
-<p class="p2"><span class="Apple-converted-space">    </span></p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;style&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>/* Design inspiré d'iOS */</p>
-<p class="p1"><span class="Apple-converted-space">        </span>:root {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>--bg-color: #f2f2f7;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>--card-bg: #ffffff;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>--primary: #007aff;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>--danger: #ff3b30;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>--text: #000000;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>body {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>background-color: var(--bg-color);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>color: var(--text);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>margin: 0;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>padding: 20px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>padding-top: env(safe-area-inset-top, 40px); /* Pour l'encoche de l'iPhone */</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>h1 {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>text-align: center;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>font-size: 28px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>margin-bottom: 20px;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>/* Formulaire d'ajout */</p>
-<p class="p1"><span class="Apple-converted-space">        </span>.add-player-container {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>display: flex;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>gap: 10px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>margin-bottom: 20px;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>input[type="text"] {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>flex-grow: 1;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>padding: 12px 15px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>border: none;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>border-radius: 10px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>font-size: 16px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>box-shadow: 0 1px 3px rgba(0,0,0,0.1);</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>.btn-add {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>background-color: var(--primary);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>color: white;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>border: none;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>border-radius: 10px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>padding: 0 20px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>font-size: 16px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>font-weight: 600;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>cursor: pointer;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>/* Liste des joueurs */</p>
-<p class="p1"><span class="Apple-converted-space">        </span>.player-card {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>background-color: var(--card-bg);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>border-radius: 12px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>padding: 15px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>margin-bottom: 12px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>display: flex;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>justify-content: space-between;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>align-items: center;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>box-shadow: 0 1px 3px rgba(0,0,0,0.1);</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>.player-info {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>flex-grow: 1;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>.player-name {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>font-size: 18px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>font-weight: 600;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>margin: 0 0 5px 0;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>.player-score {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>font-size: 22px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>font-weight: bold;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>color: var(--primary);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>margin: 0;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>/* Contrôles du score */</p>
-<p class="p1"><span class="Apple-converted-space">        </span>.score-controls {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>display: flex;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>align-items: center;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>gap: 8px;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>.btn-score {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>width: 44px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>height: 44px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>border-radius: 22px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>border: none;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>background-color: #e5e5ea;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>font-size: 24px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>font-weight: bold;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>color: var(--primary);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>cursor: pointer;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>display: flex;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>justify-content: center;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>align-items: center;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>.btn-score:active {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>background-color: #d1d1d6;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>.btn-delete {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>width: 44px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>height: 44px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>border-radius: 22px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>border: none;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>background-color: #ffe5e5;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>color: var(--danger);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>font-size: 18px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>font-weight: bold;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>cursor: pointer;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>margin-left: 10px;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;/style&gt;</p>
-<p class="p1">&lt;/head&gt;</p>
-<p class="p1">&lt;body&gt;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;h1&gt;Scores Flip7&lt;/h1&gt;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="add-player-container"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;input type="text" id="playerNameInput" placeholder="Nom du joueur" onkeypress="handleKeyPress(event)"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;button class="btn-add" onclick="addPlayer()"&gt;Ajouter&lt;/button&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;div id="playersList"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;script&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>// Clé utilisée pour sauvegarder dans le stockage local du navigateur</p>
-<p class="p1"><span class="Apple-converted-space">        </span>const STORAGE_KEY = 'flip7_scores_data';</p>
-<p class="p2"><span class="Apple-converted-space">        </span></p>
-<p class="p1"><span class="Apple-converted-space">        </span>// Chargement des données existantes ou initialisation d'un tableau vide</p>
-<p class="p1"><span class="Apple-converted-space">        </span>let players = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>// Fonction pour sauvegarder les données</p>
-<p class="p1"><span class="Apple-converted-space">        </span>function savePlayers() {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>localStorage.setItem(STORAGE_KEY, JSON.stringify(players));</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>// Fonction pour afficher les joueurs à l'écran</p>
-<p class="p1"><span class="Apple-converted-space">        </span>function renderPlayers() {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const listContainer = document.getElementById('playersList');</p>
-<p class="p1"><span class="Apple-converted-space">            </span>listContainer.innerHTML = ''; // On vide la liste avant de la recréer</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">            </span>players.forEach((player, index) =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">                </span>const playerEl = document.createElement('div');</p>
-<p class="p1"><span class="Apple-converted-space">                </span>playerEl.className = 'player-card';</p>
-<p class="p2"><span class="Apple-converted-space">                </span></p>
-<p class="p1"><span class="Apple-converted-space">                </span>playerEl.innerHTML = `</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div class="player-info"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>&lt;p class="player-name"&gt;${player.name}&lt;/p&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>&lt;p class="player-score"&gt;${player.score}&lt;/p&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div class="score-controls"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>&lt;button class="btn-score" onclick="updateScore(${index}, -1)"&gt;-&lt;/button&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>&lt;button class="btn-score" onclick="updateScore(${index}, 1)"&gt;+&lt;/button&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>&lt;button class="btn-delete" onclick="removePlayer(${index})"&gt;✕&lt;/button&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>`;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>listContainer.appendChild(playerEl);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>});</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>// Ajouter un joueur</p>
-<p class="p1"><span class="Apple-converted-space">        </span>function addPlayer() {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const input = document.getElementById('playerNameInput');</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const name = input.value.trim();</p>
-<p class="p2"><span class="Apple-converted-space">            </span></p>
-<p class="p1"><span class="Apple-converted-space">            </span>if (name !== "") {</p>
-<p class="p1"><span class="Apple-converted-space">                </span>players.push({ name: name, score: 0 });</p>
-<p class="p1"><span class="Apple-converted-space">                </span>input.value = ''; // On vide le champ</p>
-<p class="p1"><span class="Apple-converted-space">                </span>savePlayers();</p>
-<p class="p1"><span class="Apple-converted-space">                </span>renderPlayers();</p>
-<p class="p1"><span class="Apple-converted-space">            </span>}</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>// Permet d'ajouter un joueur en appuyant sur "Entrée" sur le clavier</p>
-<p class="p1"><span class="Apple-converted-space">        </span>function handleKeyPress(event) {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>if (event.key === 'Enter') {</p>
-<p class="p1"><span class="Apple-converted-space">                </span>addPlayer();</p>
-<p class="p1"><span class="Apple-converted-space">            </span>}</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>// Modifier le score</p>
-<p class="p1"><span class="Apple-converted-space">        </span>function updateScore(index, change) {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>players[index].score += change;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>savePlayers();</p>
-<p class="p1"><span class="Apple-converted-space">            </span>renderPlayers();</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>// Supprimer un joueur</p>
-<p class="p1"><span class="Apple-converted-space">        </span>function removePlayer(index) {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>if (confirm("Voulez-vous vraiment supprimer ce joueur ?")) {</p>
-<p class="p1"><span class="Apple-converted-space">                </span>players.splice(index, 1);</p>
-<p class="p1"><span class="Apple-converted-space">                </span>savePlayers();</p>
-<p class="p1"><span class="Apple-converted-space">                </span>renderPlayers();</p>
-<p class="p1"><span class="Apple-converted-space">            </span>}</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>// Affichage initial au chargement de la page</p>
-<p class="p1"><span class="Apple-converted-space">        </span>renderPlayers();</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;/script&gt;</p>
-<p class="p1">&lt;/body&gt;</p>
-<p class="p1">&lt;/html&gt;</p>
+    <h1>Scores Flip7</h1>
+    <div class="add-player-container">
+        <input type="text" id="playerNameInput" placeholder="Nom du joueur" onkeypress="handleKeyPress(event)">
+        <button class="btn-add" onclick="addPlayer()">Ajouter</button>
+    </div>
+    <div id="playersList"></div>
+    <script>
+        const STORAGE_KEY = 'flip7_scores_data';
+        let players = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+        function savePlayers() { localStorage.setItem(STORAGE_KEY, JSON.stringify(players)); }
+        function renderPlayers() {
+            const listContainer = document.getElementById('playersList');
+            listContainer.innerHTML = '';
+            players.forEach((player, index) => {
+                const playerEl = document.createElement('div');
+                playerEl.className = 'player-card';
+                playerEl.innerHTML = `
+                    <div><p style="margin:0;font-weight:600;">${player.name}</p><p class="player-score">${player.score}</p></div>
+                    <div class="score-controls">
+                        <button class="btn-score" onclick="updateScore(${index}, -1)">-</button>
+                        <button class="btn-score" onclick="updateScore(${index}, 1)">+</button>
+                        <button class="btn-delete" onclick="removePlayer(${index})">✕</button>
+                    </div>`;
+                listContainer.appendChild(playerEl);
+            });
+        }
+        function addPlayer() {
+            const input = document.getElementById('playerNameInput');
+            const name = input.value.trim();
+            if (name) { players.push({ name, score: 0 }); input.value = ''; savePlayers(); renderPlayers(); }
+        }
+        function handleKeyPress(e) { if (e.key === 'Enter') addPlayer(); }
+        function updateScore(i, c) { players[i].score += c; savePlayers(); renderPlayers(); }
+        function removePlayer(i) { if (confirm("Supprimer ?")) { players.splice(i, 1); savePlayers(); renderPlayers(); } }
+        renderPlayers();
+    </script>
 </body>
 </html>
