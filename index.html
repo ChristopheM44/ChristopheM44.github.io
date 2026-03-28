@@ -266,7 +266,7 @@
         }
 
         .card-btn {
-            aspect-ratio: 2/3;
+            aspect-ratio: 3/4;
             background: var(--surface-alt);
             border: 2px solid transparent;
             border-radius: 8px;
@@ -434,11 +434,6 @@
                     <button id="multiplierBtn" class="mod-btn" style="width: auto; padding: 6px 12px;"
                         onclick="toggleMultiplier()">ACTIVER</button>
                 </div>
-                <div class="toggle-row">
-                    <span>Seconde Chance</span>
-                    <button id="secondChanceBtn" class="mod-btn" style="width: auto; padding: 6px 12px;"
-                        onclick="toggleSecondChance()">ACTIVER</button>
-                </div>
                 <div id="flip7Row" class="toggle-row"
                     style="background: rgba(245, 158, 11, 0.1); border: 1px solid var(--accent); display: none;">
                     <span style="color: var(--accent); font-weight: 700;">✨ BONUS FLIP 7 (+15)</span>
@@ -467,7 +462,6 @@
             numbers: [],
             modifiers: [],
             hasMultiplier: false,
-            hasSecondChance: false,
             isBusted: false,
             hasFlip7: false
         };
@@ -584,7 +578,6 @@
                 numbers: [],
                 modifiers: [],
                 hasMultiplier: false,
-                hasSecondChance: false,
                 isBusted: false,
                 hasFlip7: false
             };
@@ -644,20 +637,14 @@
             updateLiveScore();
         }
 
-        function toggleSecondChance() {
-            currentRoundDraft.hasSecondChance = !currentRoundDraft.hasSecondChance;
-            updateLiveScore();
-        }
-
         function updateLiveScore() {
-            const { numbers, modifiers, hasMultiplier, hasSecondChance } = currentRoundDraft;
+            const { numbers, modifiers, hasMultiplier } = currentRoundDraft;
 
             // Check for bust (duplicate numbers)
             const uniqueNumbers = new Set(numbers);
             const duplicatesCount = numbers.length - uniqueNumbers.size;
 
-            // Second chance allows 1 duplicate
-            currentRoundDraft.isBusted = hasSecondChance ? (duplicatesCount > 1) : (duplicatesCount > 0);
+            currentRoundDraft.isBusted = duplicatesCount > 0;
 
             // Check for Flip 7 (7 different numbers)
             currentRoundDraft.hasFlip7 = uniqueNumbers.size >= 7 && !currentRoundDraft.isBusted;
@@ -681,9 +668,6 @@
 
             document.getElementById('multiplierBtn').className = `mod-btn ${hasMultiplier ? 'active' : ''}`;
             document.getElementById('multiplierBtn').innerText = hasMultiplier ? 'ACTIF' : 'ACTIVER';
-
-            document.getElementById('secondChanceBtn').className = `mod-btn ${hasSecondChance ? 'active' : ''}`;
-            document.getElementById('secondChanceBtn').innerText = hasSecondChance ? 'ACTIF' : 'ACTIVER';
 
             document.getElementById('bustRow').style.display = currentRoundDraft.isBusted ? 'flex' : 'none';
             document.getElementById('flip7Row').style.display = currentRoundDraft.hasFlip7 ? 'flex' : 'none';
