@@ -6,6 +6,9 @@ const props = defineProps({
 })
 const emit = defineEmits(['save', 'close'])
 
+const mode = ref('cards') // 'cards' | 'direct'
+const directScore = ref(null)
+
 const numbers = ref([])
 const modifiers = ref([])
 const hasMultiplier = ref(false)
@@ -17,13 +20,17 @@ const uniqueNumbers = computed(() => new Set(numbers.value))
 const isBusted = computed(() => numbers.value.length - uniqueNumbers.value.size > 0)
 const hasFlip7 = computed(() => uniqueNumbers.value.size >= 7 && !isBusted.value)
 
-const roundScore = computed(() => {
+const cardScore = computed(() => {
   if (isBusted.value) return 0
   let numSum = numbers.value.reduce((a, b) => a + b, 0)
   if (hasMultiplier.value) numSum *= 2
   const modSum = modifiers.value.reduce((a, b) => a + b, 0)
   return numSum + modSum + (hasFlip7.value ? 15 : 0)
 })
+
+const roundScore = computed(() =>
+  mode.value === 'direct' ? (directScore.value ?? 0) : cardScore.value
+)
 
 function getCardCount(val) {
   return numbers.value.filter(n => n === val).length
@@ -48,13 +55,17 @@ function toggleModifier(val) {
 }
 
 function saveScore() {
-  emit('save', {
-    numbers: numbers.value,
-    modifiers: modifiers.value,
-    hasMultiplier: hasMultiplier.value,
-    isBusted: isBusted.value,
-    hasFlip7: hasFlip7.value
-  }, roundScore.value)
+  if (mode.value === 'direct') {
+    emit('save', { numbers: [], modifiers: [], hasMultiplier: false, isBusted: false, hasFlip7: false }, roundScore.value)
+  } else {
+    emit('save', {
+      numbers: numbers.value,
+      modifiers: modifiers.value,
+      hasMultiplier: hasMultiplier.value,
+      isBusted: isBusted.value,
+      hasFlip7: hasFlip7.value
+    }, roundScore.value)
+  }
 }
 </script>
 
@@ -84,6 +95,28 @@ function saveScore() {
         </div>
       </div>
 
+      <!-- Mode toggle -->
+      <div class="flex gap-1 bg-slate-700 rounded-xl p-1 mb-4">
+        <button
+          @click="mode = 'cards'"
+          :class="['flex-1 py-1.5 rounded-lg text-sm font-semibold transition border-none cursor-pointer', mode === 'cards' ? 'bg-indigo-500 text-white' : 'text-slate-400 hover:text-white']"
+        >Cartes</button>
+        <button
+          @click="mode = 'direct'"
+          :class="['flex-1 py-1.5 rounded-lg text-sm font-semibold transition border-none cursor-pointer', mode === 'direct' ? 'bg-indigo-500 text-white' : 'text-slate-400 hover:text-white']"
+        >Score direct</button>
+      </div>
+
+      <!-- Direct score input -->
+      <div v-if="mode === 'direct'" class="mb-4">
+        <input
+          v-model.number="directScore"
+          type="number"
+          placeholder="Score du tour"
+          class="w-full bg-slate-700 text-white text-center text-3xl font-bold rounded-xl py-4 border-2 border-slate-600 focus:border-indigo-500 focus:outline-none"
+        />
+      </div>
+
       <!-- Status badges -->
       <div class="flex gap-2 mb-4" v-if="hasFlip7 || isBusted">
         <div v-if="hasFlip7" class="flex-1 text-center bg-amber-500/10 border border-amber-400 px-3 py-1.5 rounded-lg">
@@ -95,6 +128,7 @@ function saveScore() {
       </div>
 
       <!-- Number Cards -->
+      <template v-if="mode === 'cards'">
       <div class="mb-4">
         <div class="text-xs text-slate-400 uppercase tracking-widest font-bold mb-2">Cartes</div>
         <div class="grid grid-cols-7 gap-1.5">
@@ -146,6 +180,7 @@ function saveScore() {
           {{ hasMultiplier ? '✓ Multiplicateur x2 actif' : 'Multiplicateur x2' }}
         </button>
       </div>
+      </template>
 
       <!-- Validate -->
       <button

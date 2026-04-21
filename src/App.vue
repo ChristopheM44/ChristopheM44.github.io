@@ -4,9 +4,10 @@ import { usePlayers } from './composables/usePlayers.js'
 import PlayerCard from './components/PlayerCard.vue'
 import AddPlayerModal from './components/AddPlayerModal.vue'
 import ScoringModal from './components/ScoringModal.vue'
+import RecapModal from './components/RecapModal.vue'
 import UpdatePrompt from './components/UpdatePrompt.vue'
 
-const { players, addPlayer, removePlayer, resetGame, saveRoundScore } = usePlayers()
+const { players, manches, addPlayer, removePlayer, resetGame, saveCurrentManche, saveRoundScore } = usePlayers()
 
 const sortedPlayers = computed(() =>
   [...players.value]
@@ -15,6 +16,7 @@ const sortedPlayers = computed(() =>
 )
 
 const showAddPlayerModal = ref(false)
+const showRecapModal = ref(false)
 const scoringPlayerIndex = ref(null)
 
 function handleAddPlayer(name) {
@@ -40,7 +42,11 @@ function handleSaveScore(roundData, score) {
 }
 
 function startNewRound() {
-  alert('Saisissez les scores de chaque joueur pour cette manche.')
+  if (players.value.length === 0) return
+  const top = [...players.value].sort((a, b) => b.score - a.score)[0]
+  if (confirm(`Fin de manche — ${top.name} remporte cette manche !\nDémarrer une nouvelle manche ?`)) {
+    saveCurrentManche()
+  }
 }
 </script>
 
@@ -74,6 +80,12 @@ function startNewRound() {
       Reset
     </button>
     <button
+      @click="showRecapModal = true"
+      class="border-none rounded-xl px-5 py-3 font-semibold text-base cursor-pointer transition-all inline-flex items-center gap-2 bg-slate-700 text-slate-100 hover:bg-slate-600"
+    >
+      Récap
+    </button>
+    <button
       @click="showAddPlayerModal = true"
       class="border-none rounded-xl px-5 py-3 font-semibold text-base cursor-pointer transition-all inline-flex items-center gap-2 bg-slate-700 text-slate-100 hover:bg-slate-600"
     >
@@ -98,6 +110,12 @@ function startNewRound() {
     :player="players[scoringPlayerIndex]"
     @save="handleSaveScore"
     @close="scoringPlayerIndex = null"
+  />
+  <RecapModal
+    v-if="showRecapModal"
+    :players="players"
+    :manches="manches"
+    @close="showRecapModal = false"
   />
   <UpdatePrompt />
 </template>

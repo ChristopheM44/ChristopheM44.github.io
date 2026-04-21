@@ -2,11 +2,24 @@ import { ref, watch } from 'vue'
 
 const STORAGE_KEY = 'flip7_master_data'
 
-export function usePlayers() {
-  const players = ref(JSON.parse(localStorage.getItem(STORAGE_KEY)) || [])
+function loadState() {
+  const saved = JSON.parse(localStorage.getItem(STORAGE_KEY))
+  if (!saved) return { players: [], manches: [] }
+  // Migration : ancien format = tableau de joueurs
+  if (Array.isArray(saved)) return { players: saved, manches: [] }
+  return { players: saved.players ?? [], manches: saved.manches ?? [] }
+}
 
-  watch(players, (val) => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(val))
+export function usePlayers() {
+  const { players: savedPlayers, manches: savedManches } = loadState()
+  const players = ref(savedPlayers)
+  const manches = ref(savedManches)
+
+  watch([players, manches], () => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({
+      players: players.value,
+      manches: manches.value
+    }))
   }, { deep: true })
 
   function addPlayer(name) {
@@ -22,6 +35,20 @@ export function usePlayers() {
       p.score = 0
       p.rounds = []
     })
+    manches.value = []
+  }
+
+  function saveCurrentManche() {
+    const sorted = [...players.value].sort((a, b) => b.score - a.score)
+    manches.value.push({
+      winner: sorted[0].name,
+      results: players.value.map(p => ({ name: p.name, score: p.score })),
+      timestamp: Date.now()
+    })
+    players.value.forEach(p => {
+      p.score = 0
+      p.rounds = []
+    })
   }
 
   function saveRoundScore(playerIndex, roundData, score) {
@@ -33,5 +60,5 @@ export function usePlayers() {
     })
   }
 
-  return { players, addPlayer, removePlayer, resetGame, saveRoundScore }
+  return { players, manches, addPlayer, removePlayer, resetGame, saveCurrentManche, saveRoundScore }
 }
