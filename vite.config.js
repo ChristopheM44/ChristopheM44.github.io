@@ -10,9 +10,9 @@ export default defineConfig({
     VitePWA({
       registerType: 'prompt',
       manifest: {
-        name: 'Flip7 Score Master',
-        short_name: 'Flip7 Score',
-        description: 'Compteur de score pour le jeu Flip7',
+        name: 'Score Master',
+        short_name: 'Score Master',
+        description: 'Compteur de points pour jeux de société (Flip 7, Skyjo…)',
         theme_color: '#0f172a',
         background_color: '#0f172a',
         display: 'standalone',

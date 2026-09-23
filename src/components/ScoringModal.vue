@@ -2,23 +2,33 @@
 import { ref, computed } from 'vue'
 import {
   CLASSIC_CARDS, CLASSIC_MODIFIERS, VENGEANCE_CARDS, MINUS_VALUES, FLIP7_BONUS,
-  scoreClassic, scoreVengeance
+  scoreClassic, scoreVengeance, evaluateExpression
 } from '../scoring.js'
+import ScoreKeypad from './ScoreKeypad.vue'
 
 const props = defineProps({
   player: Object,
   variant: { type: String, default: 'classic' },
   brutal: { type: Boolean, default: false },
-  opponents: { type: Array, default: () => [] }
+  opponents: { type: Array, default: () => [] },
+  manche: Number,
+  // Correction d'une manche déjà saisie : score initial + bouton Effacer
+  editing: { type: Boolean, default: false },
+  initialScore: { type: Number, default: null }
 })
-const emit = defineEmits(['save', 'close'])
+const emit = defineEmits(['save', 'delete', 'close'])
 
+const isGeneric = props.variant === 'generic'
 const isVengeance = computed(() => props.variant === 'vengeance')
 const canAttack = computed(() => isVengeance.value && props.brutal && props.opponents.length > 0)
+const negativesAllowed = isGeneric || props.brutal
 
-const mode = ref('cards') // 'cards' | 'direct'
-const directScore = ref(null)
+const mode = ref(isGeneric || props.editing ? 'direct' : 'cards') // 'cards' | 'direct'
+// Score direct : expression saisie au clavier calculatrice, ex. « 12+3×2 »
+const directExpr = ref(props.initialScore != null ? String(props.initialScore).replace('-', '−') : '')
 const directAttack = ref(false)
+const directHasOperator = computed(() => /[+×÷]|.−/.test(directExpr.value))
+const directInvalid = computed(() => directExpr.value !== '' && directExpr.value !== '−' && evaluateExpression(directExpr.value) === null)
 
 const numbers = ref([])
 const isBusted = ref(false)
@@ -48,13 +58,15 @@ const isAttacking = computed(() =>
   canAttack.value && (mode.value === 'direct' ? directAttack.value : hasFlip7.value && flip7Choice.value === 'attack')
 )
 
+const directScore = computed(() => evaluateExpression(directExpr.value) ?? 0)
+
 const roundScore = computed(() =>
-  mode.value === 'direct' ? (directScore.value ?? 0) : result.value.score
+  mode.value === 'direct' ? directScore.value : result.value.score
 )
 
 const canSave = computed(() => {
   if (isAttacking.value && attackTarget.value === null) return false
-  if (mode.value === 'direct' && !props.brutal && roundScore.value < 0) return false
+  if (mode.value === 'direct' && (directInvalid.value || (!negativesAllowed && roundScore.value < 0))) return false
   return true
 })
 
@@ -112,7 +124,9 @@ const modifiersLocked = computed(() => isBusted.value && !(isVengeance.value && 
 function saveScore() {
   if (!canSave.value) return
   const attack = isAttacking.value ? { targetIndex: attackTarget.value } : null
-  if (mode.value === 'direct') {
+  if (isGeneric) {
+    emit('save', {}, roundScore.value)
+  } else if (mode.value === 'direct') {
     emit('save', { variant: props.variant, direct: true, numbers: [], modifiers: [], hasMultiplier: false, isBusted: false, hasFlip7: !!attack }, roundScore.value, attack)
   } else if (isVengeance.value) {
     emit('save', {
@@ -146,7 +160,10 @@ function saveScore() {
 
       <!-- Header -->
       <div class="flex justify-between items-center mb-4">
-        <span class="text-lg font-bold">{{ player.name }}</span>
+        <span>
+          <span class="block text-lg font-bold leading-tight">{{ player.name }}</span>
+          <span v-if="manche" class="block text-xs text-slate-400">Manche {{ manche }}{{ editing ? ' · correction' : '' }}</span>
+        </span>
         <div class="flex items-center gap-3">
           <span
             :class="[
@@ -164,7 +181,7 @@ function saveScore() {
       </div>
 
       <!-- Mode toggle -->
-      <div class="flex gap-1 bg-slate-700 rounded-xl p-1 mb-4">
+      <div v-if="!isGeneric" class="flex gap-1 bg-slate-700 rounded-xl p-1 mb-4">
         <button
           @click="mode = 'cards'"
           :class="['flex-1 py-1.5 rounded-lg text-sm font-semibold transition border-none cursor-pointer', mode === 'cards' ? 'bg-indigo-500 text-white' : 'text-slate-400 hover:text-white']"
@@ -177,14 +194,16 @@ function saveScore() {
 
       <!-- Direct score input -->
       <div v-if="mode === 'direct'" class="mb-4">
-        <input
-          v-model.number="directScore"
-          type="number"
-          :min="brutal ? undefined : 0"
-          placeholder="Score du tour"
-          class="w-full bg-slate-700 text-white text-center text-3xl font-bold rounded-xl py-4 border-2 border-slate-600 focus:border-indigo-500 focus:outline-none"
-        />
-        <p v-if="!brutal && roundScore < 0" class="text-xs text-red-400 mt-2 text-center">
+        <!-- Écran de la calculatrice -->
+        <div class="bg-slate-900/60 border-2 border-slate-600 rounded-xl px-4 py-3 mb-2 text-right">
+          <div :class="['text-3xl font-bold break-all leading-tight', directExpr ? 'text-white' : 'text-slate-500']">{{ directExpr || '0' }}</div>
+          <div class="text-sm h-5 text-slate-400">
+            <template v-if="directInvalid">Division par zéro</template>
+            <template v-else-if="directHasOperator">= {{ directScore }}</template>
+          </div>
+        </div>
+        <ScoreKeypad v-model="directExpr" @submit="saveScore" />
+        <p v-if="!negativesAllowed && roundScore < 0" class="text-xs text-red-400 mt-2 text-center">
           Score négatif possible uniquement en mode Brutal.
         </p>
         <button
@@ -348,13 +367,20 @@ function saveScore() {
       </div>
 
       <!-- Validate -->
-      <button
-        @click="saveScore"
-        :disabled="!canSave"
-        class="w-full py-3 bg-indigo-500 hover:bg-indigo-400 rounded-xl font-semibold text-base transition border-none cursor-pointer text-white disabled:opacity-40 disabled:cursor-not-allowed"
-      >
-        {{ isAttacking && attackTarget === null ? 'Choisissez une cible' : 'Valider' }}
-      </button>
+      <div class="flex gap-2">
+        <button
+          v-if="editing"
+          @click="$emit('delete')"
+          class="px-4 py-3 rounded-xl font-semibold text-base transition border-none cursor-pointer bg-red-500/10 text-red-400 hover:bg-red-500/20"
+        >Effacer</button>
+        <button
+          @click="saveScore"
+          :disabled="!canSave"
+          class="flex-1 py-3 bg-indigo-500 hover:bg-indigo-400 rounded-xl font-semibold text-base transition border-none cursor-pointer text-white disabled:opacity-40 disabled:cursor-not-allowed"
+        >
+          {{ isAttacking && attackTarget === null ? 'Choisissez une cible' : 'Valider' }}
+        </button>
+      </div>
     </div>
   </div>
 </template>

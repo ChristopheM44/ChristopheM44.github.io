@@ -19,19 +19,39 @@ Vue 3 (Composition API) + Vite 6 + Tailwind CSS v4 (`@tailwindcss/vite` plugin, 
 
 ## Architecture
 
-All game state lives in `src/composables/usePlayers.js`, which persists to `localStorage` (key `flip7_master_data`, object `{ players, manches, settings }`) via a deep `watch`. `settings = { variant: 'classic' | 'vengeance', brutal }` is chosen per game and locked (`isLocked`) as soon as any player has a round. The composable is only consumed by `App.vue`.
+All game state lives in `src/composables/useGame.js` — a module-level singleton (every `useGame()` call shares the same refs) persisted to `localStorage` key `score_master_data` as `{ version: 2, current, history }` via a deep `watch`. Without v2 data, an old `flip7_master_data` payload is migrated: its players become `current`, and each of its old "manches" (games to 200) becomes a `history` entry (the old key is left untouched).
 
-**Component tree:**
+Vocabulary: **Partie** (a game: players, settings, ends when someone reaches `target`) › **Manche** (one row of scores).
 
 ```
-App.vue                  — variant selector (Classique / Vengeance + Mode Brutal)
-├── PlayerCard.vue       — one per player, owns showHistory toggle
-├── AddPlayerModal.vue   — overlay, emits 'add' (name) or 'close'
-├── ScoringModal.vue     — overlay, "Cartes" or "Score direct" tabs, emits 'save' (roundData, score, attack?) or 'close'
-└── RecapModal.vue       — finished manches, with Vengeance / Brutal badges
+Partie (current) = { id, createdAt, game: 'flip7' | 'generic', name,
+                     settings: { variant, brutal, target, lowestWins },
+                     players: [{ name, startManche, rounds: [{ manche, score, timestamp, ...flip7 details }] }] }
+History entry    = { id, createdAt, endedAt, game, name, settings, winners,
+                     results: [{ name, score, manches: { [n]: score } | null }] }
 ```
 
-`App.vue` holds the modal-visibility refs (`showAddPlayerModal`, `showRecapModal`, `scoringPlayerIndex`) and computes `sortedPlayers` (by score desc, keeping `originalIndex` to map back to the mutable `players` array). `opponents` passed to `ScoringModal` carry real indexes into `players`.
+- Totals are **never stored**: always `playerTotal(p)` (sum of rounds). Player names are the identity — duplicates are rejected (`sameName`).
+- Every game scores one player at a time through `saveRoundScore(index, roundData, score, attack, manche)`. The default manche is `nextMancheFor(player)` (first unplayed manche ≥ `startManche`, so gaps get filled). Saving on an already played manche replaces it, along with its linked Brutal attack (`from` + `timestamp`). `deleteRound` removes a round and its attack. Late joiners get `startManche = playingManche`.
+- After each save, `GameView` prompts "Fin de partie" when the manche is complete (`isMancheComplete`) and someone reached `target`; `finishPartie()` moves the partie to `history` and returns its id for `ResultView`.
+
+**Screens** (`App.vue` switches on a local `screen` ref and provides `askConfirm` to views):
+
+```
+App.vue                   — screen switch + ConfirmModal
+├── views/HomeView.vue    — current partie (Reprendre / Abandonner), new partie, history link
+├── views/SetupView.vue   — game name + presets (Skyjo…), Brutal, end score, winner direction, players
+├── views/GameView.vue    — Cartes / Tableau tabs, end-of-partie prompt
+│   ├── PlayerCard.vue    — one per player, "Points" button
+│   ├── ScoreTable.vue    — rows = manches, columns = players; tap a cell to correct it
+│   ├── ScoringModal.vue  — score entry for all games (variant 'generic' = direct score only), edit mode with Effacer
+│   │   └── ScoreKeypad.vue — calculator keypad for the direct score (digits, + − × ÷, physical keyboard too)
+│   └── AddPlayerModal.vue
+├── views/ResultView.vue  — final ranking + ScoreTable, "Rejouer"
+└── views/HistoryView.vue — filter by game, wins per player, finished parties
+```
+
+Pure helpers (`evaluateExpression` for the keypad — × ÷ first, leading − = negative, result floored, `null` on ÷0 —, `playerTotal`, `mancheScores`, `currentManche`, `nextMancheFor`, `isMancheComplete`, `rankStandings`, `sameName`) live in `src/scoring.js`.
 
 ### Scoring rules (pure functions in `src/scoring.js`)
 
@@ -46,7 +66,7 @@ Vengeance (`scoreVengeance`):
 - Flip 7 = 7 number cards
 - Brutal: negative rounds allowed, busted player scores −(received modifiers), Flip 7 bonus can instead be −15 to an opponent (stored as a `{ type: 'attack' }` round on the target; totals may go below 0)
 
-Winner threshold: 200 points (shown with crown in PlayerCard).
+Flip 7 default end score: 200 points. The crown in PlayerCard goes to the winner(s) once someone reached the partie's `target` (lowest total wins when `lowestWins`).
 
 ## GitHub Pages deployment
 
