@@ -19,15 +19,17 @@ A clean build with no errors or warnings is the acceptance criterion.
 
 ## State & data flow
 
-- All player data flows from `src/composables/usePlayers.js` → `App.vue` → child components via props/emits.
+- All game data lives in the singleton composable `src/composables/useGame.js`; views (`src/views/`) call `useGame()` and pass data to components via props/emits.
 - Do not introduce a global store (Pinia, Vuex) — the composable pattern is intentional for this app size.
-- Persist player data only via the `saveRoundScore`, `addPlayer`, `removePlayer`, `resetGame` functions in the composable. Do not write to `localStorage` directly in components.
+- Mutate data only via the composable functions (`startPartie`, `finishPartie`, `abandonPartie`, `deletePartie`, `addPlayer`, `removePlayer`, `saveRoundScore`, `deleteRound`). Do not write to `localStorage` directly in components.
+- Never store a player's total: compute it with `playerTotal()` from `src/scoring.js`.
 
 ## Component conventions
 
 - Keep round-draft state (selected cards, modifiers, multiplier) local to `ScoringModal.vue` — it is ephemeral and must not leak to the store.
-- Modals are v-if'd in `App.vue`; they mount fresh each time, so no manual reset needed.
-- `sortedPlayers` in `App.vue` maps each player to its `originalIndex` in the mutable `players.value` array. Always use `originalIndex` for mutations, not the sorted position.
+- Modals are v-if'd in their view; they mount fresh each time, so no manual reset needed.
+- `standings` / `ranking.sorted` from `useGame()` carry each player's `index` in the mutable `players` array. Always use that `index` for mutations, not the sorted position.
+- Confirmations go through the `askConfirm` function provided by `App.vue` (`inject('askConfirm')`), never `window.confirm()`.
 
 ## Styling rules
 

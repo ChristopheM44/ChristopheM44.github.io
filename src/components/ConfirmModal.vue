@@ -3,6 +3,7 @@ defineProps({
   title: String,
   message: String,
   confirmLabel: { type: String, default: 'Confirmer' },
+  cancelLabel: { type: String, default: 'Annuler' },
   danger: { type: Boolean, default: false }
 })
 defineEmits(['confirm', 'cancel'])
@@ -17,7 +18,7 @@ defineEmits(['confirm', 'cancel'])
         <button
           @click="$emit('cancel')"
           class="flex-1 py-2.5 rounded-xl font-semibold text-sm transition border-none cursor-pointer bg-slate-700 text-white hover:bg-slate-600"
-        >Annuler</button>
+        >{{ cancelLabel }}</button>
         <button
           @click="$emit('confirm')"
           :class="[

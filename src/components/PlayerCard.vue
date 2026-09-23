@@ -3,18 +3,19 @@ import { ref, computed } from 'vue'
 import { formatSigned } from '../scoring.js'
 
 const props = defineProps({
-  player: Object
+  player: Object,
+  total: Number,
+  leader: { type: Boolean, default: false }
 })
 
 defineEmits(['score', 'remove'])
 
 const showHistory = ref(false)
 
-// Les attaques reçues ne comptent pas comme des manches jouées
-const history = computed(() => {
-  let n = 0
-  return props.player.rounds.map(r => ({ ...r, label: r.type === 'attack' ? null : ++n }))
-})
+// Les attaques reçues n'ont pas de libellé de manche
+const history = computed(() =>
+  props.player.rounds.map(r => ({ ...r, label: r.type === 'attack' ? null : r.manche }))
+)
 
 function describe(r) {
   if (r.type === 'attack') return `Flip 7 de ${r.from}`
@@ -35,7 +36,7 @@ function describe(r) {
   <div
     :class="[
       'fade-in relative overflow-hidden rounded-xl px-4 py-3 shadow-lg border transition-transform',
-      player.score >= 200
+      leader
         ? 'border-amber-400 bg-gradient-to-br from-slate-800 to-amber-950'
         : 'border-white/5 bg-slate-800'
     ]"
@@ -45,8 +46,8 @@ function describe(r) {
 
     <div class="flex justify-between items-center">
       <div class="cursor-pointer" @click="showHistory = !showHistory">
-        <h3 class="text-base font-semibold">{{ player.name }} {{ player.score >= 200 ? '👑' : '' }}</h3>
-        <p :class="['text-2xl font-bold', player.score < 0 ? 'text-red-400' : 'text-indigo-400']">{{ player.score }}</p>
+        <h3 class="text-base font-semibold">{{ player.name }} {{ leader ? '👑' : '' }}</h3>
+        <p :class="['text-2xl font-bold', total < 0 ? 'text-red-400' : 'text-indigo-400']">{{ total }}</p>
       </div>
       <div class="flex gap-2">
         <button
@@ -74,7 +75,7 @@ function describe(r) {
         class="flex justify-between py-1"
       >
         <span :class="r.type === 'attack' ? 'text-red-400' : ''">
-          <template v-if="r.label">Manche {{ r.label }} : </template>{{ describe(r) }}
+          <template v-if="r.label">Manche {{ r.label }}{{ describe(r) ? ' : ' : '' }}</template>{{ describe(r) }}
         </span>
         <span :class="['font-bold', r.score < 0 ? 'text-red-400' : 'text-indigo-400']">{{ formatSigned(r.score) }}</span>
       </div>
