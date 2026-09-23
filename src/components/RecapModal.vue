@@ -57,8 +57,12 @@ const sortedManches = computed(() => [...props.manches].reverse())
           class="bg-slate-700/50 rounded-xl px-4 py-3"
         >
           <div class="flex items-center justify-between mb-2">
-            <span class="text-xs text-slate-400 font-semibold uppercase tracking-wider">
-              Manche {{ manches.length - i }}
+            <span class="flex items-center gap-2">
+              <span class="text-xs text-slate-400 font-semibold uppercase tracking-wider">
+                Manche {{ manches.length - i }}
+              </span>
+              <span v-if="manche.variant === 'vengeance'" class="text-[10px] font-bold uppercase bg-indigo-500/20 text-indigo-300 rounded px-1.5 py-0.5">Vengeance</span>
+              <span v-if="manche.brutal" class="text-[10px] font-bold uppercase bg-red-500/20 text-red-300 rounded px-1.5 py-0.5">Brutal</span>
             </span>
             <span class="text-amber-400 font-bold text-sm">👑 {{ manche.winner }}</span>
           </div>
